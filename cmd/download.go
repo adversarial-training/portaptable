@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func runDownloadMode(config *config.Config) error {
+func RunDownloadMode(config *config.Config) error {
 	fmt.Println("Resolving package dependencies...")
 
 	// Get all dependencies for the requested packages

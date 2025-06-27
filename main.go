@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"portaptable/cmd"
 	"portaptable/pkg/config"
 )
 
@@ -15,25 +17,24 @@ const (
 )
 
 func main() {
-	var config config.Config
+	var cfg config.Config
 	var downloadMode, serveMode, helpMode bool
 
 	// Define command line flags
 	flag.BoolVar(&downloadMode, "download", false, "Download mode: fetch packages and dependencies")
 	flag.BoolVar(&serveMode, "serve", false, "Serve mode: start local repository server")
 	flag.BoolVar(&helpMode, "help", false, "Show help information")
-	flag.StringVar(&config.RepoPath, "repo", defaultRepoPath, "Repository directory path")
-	flag.StringVar(&config.Port, "port", defaultPort, "Port for serve mode")
-	flag.StringVar(&config.ConfigFile, "config", "", "Configuration file path")
-	flag.StringVar(&config.Architecture, "arch", "amd64", "Target architecture")
-	flag.StringVar(&config.Distribution, "dist", "focal", "Target distribution (e.g., focal, jammy)")
+	flag.StringVar(&cfg.RepoPath, "repo", defaultRepoPath, "Repository directory path")
+	flag.StringVar(&cfg.Port, "port", defaultPort, "Port for serve mode")
+	flag.StringVar(&cfg.ConfigFile, "config", "", "Configuration file path")
+	flag.StringVar(&cfg.Architecture, "arch", "amd64", "Target architecture")
+	flag.StringVar(&cfg.Distribution, "dist", "focal", "Target distribution (e.g., focal, jammy)")
 
 	flag.Parse()
 
 	// Show help if requested or no mode specified
 	if helpMode || (!downloadMode && !serveMode) {
 		showHelp()
-
 		return
 	}
 
@@ -44,15 +45,15 @@ func main() {
 
 	// Get remaining arguments as package names for download mode
 	if downloadMode {
-		config.Packages = flag.Args()
+		cfg.Packages = flag.Args()
 
-		if len(config.Packages) == 0 {
+		if len(cfg.Packages) == 0 {
 			log.Fatal("Error: No packages specified for download mode")
 		}
 	}
 
 	// Ensure repository path exists
-	if err := ensureRepoPath(config.RepoPath); err != nil {
+	if err := ensureRepoPath(cfg.RepoPath); err != nil {
 		log.Fatalf("Error creating repository path: %v", err)
 	}
 
@@ -60,30 +61,31 @@ func main() {
 	switch {
 	case downloadMode:
 		fmt.Printf("Starting download mode...\n")
-		fmt.Printf("Repository: %s\n", config.RepoPath)
-		fmt.Printf("Architecture: %s\n", config.Architecture)
-		fmt.Printf("Distribution: %s\n", config.Distribution)
-		fmt.Printf("Packages: %v\n", config.Packages)
+		fmt.Printf("Repository: %s\n", cfg.RepoPath)
+		fmt.Printf("Architecture: %s\n", cfg.Architecture)
+		fmt.Printf("Distribution: %s\n", cfg.Distribution)
+		fmt.Printf("Packages: %v\n", cfg.Packages)
 
-		if err := runDownloadMode(&config); err != nil {
+		if err := cmd.RunDownloadMode(&cfg); err != nil {
 			log.Fatalf("Download mode failed: %v", err)
 		}
-
 		fmt.Println("Download completed successfully")
 
 	case serveMode:
 		fmt.Printf("Starting serve mode...\n")
-		fmt.Printf("Repository: %s\n", config.RepoPath)
-		fmt.Printf("Port: %s\n", config.Port)
+		fmt.Printf("Repository: %s\n", cfg.RepoPath)
+		fmt.Printf("Port: %s\n", cfg.Port)
 
-		if err := runServeMode(&config); err != nil {
+		if err := cmd.RunServeMode(&cfg); err != nil {
 			log.Fatalf("Serve mode failed: %v", err)
 		}
 	}
+
+	return
 }
 
 func showHelp() {
-	fmt.Printf(`portaptable - Offline APT Package Management Tool
+	fmt.Printf(`apt-offline - Offline APT Package Management Tool
 
 Usage:
   %s [OPTIONS] --download package1 [package2 ...]
@@ -135,22 +137,6 @@ func ensureRepoPath(repoPath string) error {
 			return fmt.Errorf("failed to create %s directory: %w", subdir, err)
 		}
 	}
-
-	return nil
-}
-
-func runDownloadMode(config *config.Config) error {
-	// TODO: Implement download functionality
-	// This will call functions from cmd/download.go
-	fmt.Println("Download mode implementation pending...")
-
-	return nil
-}
-
-func runServeMode(config *config.Config) error {
-	// TODO: Implement serve functionality
-	// This will call functions from cmd/install.go
-	fmt.Println("Serve mode implementation pending...")
 
 	return nil
 }

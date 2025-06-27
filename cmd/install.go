@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -17,7 +17,7 @@ type RepositoryServer struct {
 	manifest *manifest.Manifest
 }
 
-func runServeMode(config *config.Config) error {
+func RunServeMode(config *config.Config) error {
 	server := &RepositoryServer{config: config}
 
 	// Load and validate repository
